@@ -17,10 +17,11 @@ def register(app: typer.Typer) -> None:
     Args:
         app: The Typer app to register the command with.
     """
-    app.command()(concat)
+    app.command(no_args_is_help=True)(concat)
 
 
 def concat(
+    ctx: typer.Context,
     input_files: list[Path] = typer.Argument(
         ...,
         help="Input video files to concatenate",
@@ -38,19 +39,12 @@ def concat(
     vertical: bool = typer.Option(
         False,
         "--vertical",
-        "-v",
         help="Stack videos vertically instead of horizontally",
     ),
     overwrite: bool = typer.Option(
         False,
         "--overwrite",
         help="Overwrite output file if it exists",
-    ),
-    quiet: bool = typer.Option(
-        False,
-        "--quiet",
-        "-q",
-        help="Suppress all output except errors",
     ),
 ) -> None:
     """
@@ -60,14 +54,13 @@ def concat(
         - Concatenate videos horizontally: vidio concat video1.mp4 video2.mp4 output.mp4
         - Stack videos vertically: vidio concat video1.mp4 video2.mp4 output.mp4 --vertical
     """
+    # Get verbose flag from global context
+    verbose = ctx.obj.get("VERBOSE", False) if ctx.obj else False
+
     # Check if output file exists and if we should overwrite it
     if not check_output_file(output_file, overwrite):
         console.print("[yellow]Aborted.[/yellow]")
         raise typer.Exit(code=0)
-
-    if not quiet:
-        direction = "vertically" if vertical else "horizontally"
-        console.print(f"Concatenating {len(input_files)} videos {direction}...")
 
     # Build the filter complex string for concatenation
     filter_complex = ""
@@ -107,11 +100,4 @@ def concat(
     ]
 
     # Run the command
-    run_ffmpeg(command, quiet=quiet)
-
-    if not quiet:
-        console.print(
-            f"[green]Concatenation completed![/green] Output saved to: {output_file}"
-        )
-
-    return
+    run_ffmpeg(command, verbose=verbose)

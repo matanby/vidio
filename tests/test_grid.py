@@ -77,7 +77,6 @@ def test_grid_basic(temp_output_dir):
     # Check that it succeeded
     assert result.exit_code == 0
     assert output_file.exists()
-    assert "Grid created:" in result.stdout
 
 
 def test_grid_with_padding(temp_output_dir):
@@ -104,4 +103,3 @@ def test_grid_with_padding(temp_output_dir):
     # Check that it succeeded
     assert result.exit_code == 0
     assert output_file.exists()
-    assert "Grid created:" in result.stdout

@@ -45,7 +45,6 @@ def test_concat_horizontal(temp_output_dir):
     # Check that it succeeded
     assert result.exit_code == 0
     assert output_file.exists()
-    assert "Concatenation completed" in result.stdout
 
 
 def test_concat_vertical(temp_output_dir):
@@ -61,4 +60,3 @@ def test_concat_vertical(temp_output_dir):
     # Check that it succeeded
     assert result.exit_code == 0
     assert output_file.exists()
-    assert "Concatenation completed" in result.stdout

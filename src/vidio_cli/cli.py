@@ -11,6 +11,7 @@ from vidio_cli.ffmpeg_utils import ensure_ffmpeg
 app = typer.Typer(
     help="A simple ffmpeg wrapper for common video operations",
     add_completion=False,  # No shell completion for now
+    no_args_is_help=True,
 )
 
 console = Console()
@@ -29,11 +30,16 @@ def main(
     version: bool = typer.Option(
         False,
         "--version",
-        "-v",
+        "-V",
         help="Show the version and exit.",
         callback=version_callback,
     ),
-    quiet: bool = typer.Option(False, "--quiet", "-q", help="Suppress all output except errors."),
+    verbose: bool = typer.Option(
+        False,
+        "--verbose",
+        "-v",
+        help="Show ffmpeg commands and other debug info.",
+    ),
 ) -> None:
     """
     A simple CLI tool to perform common video operations using ffmpeg.
@@ -41,9 +47,9 @@ def main(
     # Check if ffmpeg is installed
     ensure_ffmpeg()
 
-    # Store quiet flag in context for global access
+    # Store verbose flag in context for global access
     ctx.ensure_object(dict)
-    ctx.obj["QUIET"] = quiet
+    ctx.obj["VERBOSE"] = verbose
 
 
 # Dynamic command registration

@@ -1,5 +1,6 @@
 """Utilities for working with ffmpeg."""
 
+import json
 import shutil
 import subprocess
 from pathlib import Path
@@ -34,15 +35,54 @@ def ensure_ffmpeg():
         raise typer.Exit(code=1)
 
 
+def get_video_info(file_path: Path) -> dict:
+    """
+    Get video information using ffprobe.
+
+    Args:
+        file_path: Path to the video file.
+
+    Returns:
+        dict: The video information as a dictionary.
+    """
+    ensure_ffmpeg()  # ffprobe is part of ffmpeg installation
+    command = [
+        "ffprobe",
+        "-v",
+        "quiet",
+        "-print_format",
+        "json",
+        "-show_format",
+        "-show_streams",
+        str(file_path),
+    ]
+    try:
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        return json.loads(result.stdout)
+    except subprocess.CalledProcessError as e:
+        error_console.print("[bold red]Error:[/bold red] ffprobe command failed")
+        if e.stderr:
+            error_console.print(e.stderr)
+        raise typer.Exit(code=1)
+    except json.JSONDecodeError:
+        error_console.print("[bold red]Error:[/bold red] Failed to parse ffprobe output.")
+        raise typer.Exit(code=1)
+
+
 def run_ffmpeg(
-    command: list[str], quiet: bool = False, check: bool = True
+    command: list[str], verbose: bool = False, check: bool = True
 ) -> subprocess.CompletedProcess:
     """
     Run an ffmpeg command and handle output/errors.
 
     Args:
         command: List of command arguments, starting with ["ffmpeg", ...]
-        quiet: If True, suppress all output except for errors.
+        verbose: If True, print the command and show ffmpeg output.
         check: If True, raise an exception if the command fails.
 
     Returns:
@@ -50,12 +90,12 @@ def run_ffmpeg(
     """
     ensure_ffmpeg()
 
-    if not quiet:
+    if verbose:
         console.print(f"Running: [dim]{' '.join(command)}[/dim]")
 
     # Set up stdout/stderr redirection
-    stdout = subprocess.PIPE if quiet else None
-    stderr = subprocess.PIPE
+    stdout = None if verbose else subprocess.PIPE
+    stderr = None if verbose else subprocess.PIPE
 
     try:
         result = subprocess.run(

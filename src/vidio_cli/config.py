@@ -4,8 +4,6 @@ from typing import Any
 
 # Default settings
 DEFAULTS = {
-    # General settings
-    "quiet": False,
     # Common ffmpeg options
     "video_codec": "libx264",
     "audio_codec": "aac",

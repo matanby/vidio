@@ -18,48 +18,52 @@ def register(app: typer.Typer) -> None:
     Args:
         app: The Typer app to register the command with.
     """
-    app.command()(grid)
+    app.command(no_args_is_help=True)(grid)
 
 
 def calculate_grid_size(
     num_videos: int, rows: int | None = None, cols: int | None = None
 ) -> tuple[int, int]:
     """
-    Calculate the number of rows and columns for a grid.
+    Calculate the optimal grid size for the given number of videos.
 
     Args:
         num_videos: Number of videos to arrange.
-        rows: Number of rows (optional).
-        cols: Number of columns (optional).
+        rows: Desired number of rows (optional).
+        cols: Desired number of columns (optional).
 
     Returns:
-        tuple[int, int]: The number of rows and columns.
+        tuple[int, int]: (rows, cols) for the grid.
+
+    Raises:
+        ValueError: If the specified rows/cols don't accommodate all videos.
     """
     if rows is not None and cols is not None:
-        # Both specified, make sure we have enough cells
+        # Both specified - validate they can hold all videos
         if rows * cols < num_videos:
             raise ValueError(
-                f"Grid size {rows}x{cols} is too small for {num_videos} videos"
+                f"Grid size {rows}×{cols} ({rows * cols} cells) cannot accommodate {num_videos} videos"
             )
         return rows, cols
-
-    if rows is not None:
-        # Rows specified, calculate columns
+    elif rows is not None:
+        # Only rows specified - calculate cols
         cols = math.ceil(num_videos / rows)
         return rows, cols
-
-    if cols is not None:
-        # Columns specified, calculate rows
+    elif cols is not None:
+        # Only cols specified - calculate rows
+        rows = math.ceil(num_videos / cols)
+        return rows, cols
+    else:
+        # Neither specified - calculate optimal square-ish grid
+        # Prefer more columns over rows for better aspect ratio
+        sqrt_videos = math.sqrt(num_videos)
+        cols = math.ceil(sqrt_videos)
         rows = math.ceil(num_videos / cols)
         return rows, cols
 
-    # Neither specified, calculate a square-ish grid
-    cols = math.ceil(math.sqrt(num_videos))
-    rows = math.ceil(num_videos / cols)
-    return rows, cols
-
 
 def grid(
+    ctx: typer.Context,
     input_files: list[Path] = typer.Argument(
         ...,
         help="Input video files to arrange in a grid",
@@ -115,17 +119,6 @@ def grid(
         "--overwrite",
         help="Overwrite output file if it exists",
     ),
-    quiet: bool = typer.Option(
-        False,
-        "--quiet",
-        "-q",
-        help="Suppress all output except errors",
-    ),
-    debug: bool = typer.Option(
-        False,
-        "--debug",
-        help="Show debug information",
-    ),
 ) -> None:
     """
     Arrange multiple videos in a grid layout.
@@ -136,6 +129,9 @@ def grid(
         - Set cell size: vidio grid video1.mp4 video2.mp4 video3.mp4 video4.mp4 output.mp4 --width 640 --height 360
         - Add padding: vidio grid video1.mp4 video2.mp4 video3.mp4 video4.mp4 output.mp4 --padding 10
     """
+    # Get verbose flag from global context
+    verbose = ctx.obj.get("VERBOSE", False) if ctx.obj else False
+
     # Check if output file exists and if we should overwrite it
     if not check_output_file(output_file, overwrite):
         console.print("[yellow]Aborted.[/yellow]")
@@ -148,17 +144,10 @@ def grid(
         console.print(f"[red]Error:[/red] {str(e)}")
         raise typer.Exit(code=1)
 
-    # Enable debug output if requested
-    if debug:
-        quiet = False
-
-    if not quiet:
+    if verbose:
         console.print(
             f"Creating {grid_rows}×{grid_cols} video grid with {len(input_files)} videos..."
         )
-        if debug:
-            console.print(f"Grid dimensions: {grid_rows} rows × {grid_cols} columns")
-            console.print(f"Number of videos: {len(input_files)}")
 
     # Prepare inputs
     inputs = []
@@ -247,7 +236,7 @@ def grid(
         # However, with min=2 inputs, row_labels will always have at least one item.
 
     # Debug output
-    if debug and not quiet:
+    if verbose:
         console.print(f"Filter complex: {filter_complex}")
 
     # Build the ffmpeg command
@@ -266,9 +255,4 @@ def grid(
     ]
 
     # Run the command
-    run_ffmpeg(command, quiet=quiet)
-
-    if not quiet:
-        console.print(f"[green]Grid created:[/green] {output_file}")
-
-    return
+    run_ffmpeg(command, verbose=verbose)

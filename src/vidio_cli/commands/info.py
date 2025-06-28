@@ -2,12 +2,12 @@
 
 import json
 from pathlib import Path
+import subprocess
 
 import typer
 from rich.console import Console
 from rich.table import Table
 
-from vidio_cli.ffmpeg_utils import run_ffmpeg
 
 console = Console()
 
@@ -19,22 +19,21 @@ def register(app: typer.Typer) -> None:
     Args:
         app: The Typer app to register the command with.
     """
-    app.command()(info)
+    app.command(no_args_is_help=True)(info)
 
 
-def count_frames(input_file: Path, quiet: bool = False) -> int:
+def count_frames(input_file: Path, verbose: bool = False) -> int:
     """
     Count the exact number of frames in a video file.
 
     Args:
         input_file: Path to the video file.
-        quiet: If True, suppress all output except errors.
+        verbose: If True, show ffmpeg commands and other debug info.
 
     Returns:
         int: The total number of frames.
     """
-    if not quiet:
-        console.print("Calculating exact frame count (this may take a while)...")
+    console.print("Calculating exact frame count (this may take a while)...")
 
     # Use ffprobe to count frames accurately
     command = [
@@ -51,15 +50,32 @@ def count_frames(input_file: Path, quiet: bool = False) -> int:
         str(input_file),
     ]
 
-    result = run_ffmpeg(command, quiet=True, check=True)
+    if verbose:
+        console.print(f"Running: [dim]{' '.join(command)}[/dim]")
+
+    # Always capture output for ffprobe commands, regardless of verbose setting
     try:
-        frames = int(result.stdout.strip() or result.stderr.strip())
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError as e:
+        console.print("[red]Error: ffprobe command failed[/red]")
+        if e.stderr:
+            console.print(e.stderr)
+        raise typer.Exit(1)
+
+    try:
+        frames = int(result.stdout.strip())
         return frames
     except (ValueError, TypeError):
         return 0
 
 
 def info(
+    ctx: typer.Context,
     input_file: Path = typer.Argument(
         ...,
         help="Input video file to display information for",
@@ -77,12 +93,6 @@ def info(
         "--exact-frames",
         help="Calculate exact frame count (slower but accurate)",
     ),
-    quiet: bool = typer.Option(
-        False,
-        "--quiet",
-        "-q",
-        help="Suppress all output except errors",
-    ),
 ) -> None:
     """
     Display detailed information about a video file.
@@ -92,6 +102,8 @@ def info(
         - Get JSON output for scripting: vidio info video.mp4 --json
         - Calculate exact frame count: vidio info video.mp4 --exact-frames
     """
+    # Get verbose flag from global context
+    verbose = ctx.obj.get("VERBOSE", False) if ctx.obj else False
 
     # Run ffprobe to get file information
     command = [
@@ -105,10 +117,25 @@ def info(
         str(input_file),
     ]
 
-    result = run_ffmpeg(command, quiet=True, check=True)
+    if verbose:
+        console.print(f"Running: [dim]{' '.join(command)}[/dim]")
+
+    # Always capture output for ffprobe commands, regardless of verbose setting
+    try:
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+    except subprocess.CalledProcessError as e:
+        console.print("[red]Error: ffprobe command failed[/red]")
+        if e.stderr:
+            console.print(e.stderr)
+        raise typer.Exit(1)
 
     try:
-        info_data = json.loads(result.stderr or result.stdout)
+        info_data = json.loads(result.stdout)
     except json.JSONDecodeError:
         console.print("[red]Error parsing ffprobe output.[/red]")
         raise typer.Exit(1)
@@ -144,7 +171,7 @@ def info(
 
         # If metadata doesn't have frame count or exact count requested, calculate it
         if not has_frame_count or exact_frames:
-            total_frames = count_frames(input_file, quiet)
+            total_frames = count_frames(input_file, verbose)
             has_frame_count = True
 
             # Update the info_data for JSON output
