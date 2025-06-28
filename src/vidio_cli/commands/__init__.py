@@ -3,10 +3,10 @@
 import pkgutil
 from importlib import import_module
 from pathlib import Path
-from typing import Callable, Dict
+from typing import Callable
 
 
-def get_commands() -> Dict[str, Callable]:
+def get_commands() -> dict[str, Callable]:
     """
     Dynamically discover and import all command modules in this package.
 

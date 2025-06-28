@@ -1,7 +1,6 @@
 """Command module for concatenating videos horizontally or vertically."""
 
 from pathlib import Path
-from typing import List
 
 import typer
 from rich.console import Console
@@ -22,7 +21,7 @@ def register(app: typer.Typer) -> None:
 
 
 def concat(
-    input_files: List[Path] = typer.Argument(
+    input_files: list[Path] = typer.Argument(
         ...,
         help="Input video files to concatenate",
         exists=True,
@@ -111,6 +110,8 @@ def concat(
     run_ffmpeg(command, quiet=quiet)
 
     if not quiet:
-        console.print(f"[green]Concatenation completed![/green] Output saved to: {output_file}")
+        console.print(
+            f"[green]Concatenation completed![/green] Output saved to: {output_file}"
+        )
 
     return

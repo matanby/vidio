@@ -56,6 +56,22 @@ vidio info video.mp4 --json
 vidio info video.mp4 --exact-frames
 ```
 
+### Create Video Grids
+
+```bash
+# Arrange videos in a 2x2 grid (auto-calculated)
+vidio grid video1.mp4 video2.mp4 video3.mp4 video4.mp4 output.mp4
+
+# Specify grid dimensions
+vidio grid video1.mp4 video2.mp4 video3.mp4 video4.mp4 output.mp4 --rows 2 --cols 2
+
+# Control cell size and add padding
+vidio grid video1.mp4 video2.mp4 video3.mp4 video4.mp4 output.mp4 --width 640 --height 360 --padding 10
+
+# Change background color
+vidio grid video1.mp4 video2.mp4 video3.mp4 video4.mp4 output.mp4 --background white
+```
+
 ### More Commands Coming Soon
 
 - `grid`: Arrange videos in a grid

@@ -50,4 +50,4 @@ def test_info_json():
         assert "format" in data
         assert "streams" in data
     except json.JSONDecodeError:
-        pytest.fail("Output is not valid JSON")
+        pytest.fail("Output is not valid JSON")  # ty: ignore

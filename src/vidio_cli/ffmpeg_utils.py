@@ -3,7 +3,6 @@
 import shutil
 import subprocess
 from pathlib import Path
-from typing import List
 
 import typer
 from rich.console import Console
@@ -29,12 +28,14 @@ def ensure_ffmpeg():
     if not check_ffmpeg():
         error_console.print("[bold red]Error:[/bold red] ffmpeg not found in PATH")
         error_console.print("Please install ffmpeg and make sure it's in your PATH.")
-        error_console.print("Installation instructions: https://ffmpeg.org/download.html")
+        error_console.print(
+            "Installation instructions: https://ffmpeg.org/download.html"
+        )
         raise typer.Exit(code=1)
 
 
 def run_ffmpeg(
-    command: List[str], quiet: bool = False, check: bool = True
+    command: list[str], quiet: bool = False, check: bool = True
 ) -> subprocess.CompletedProcess:
     """
     Run an ffmpeg command and handle output/errors.
