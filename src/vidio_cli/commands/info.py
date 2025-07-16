@@ -2,12 +2,12 @@
 
 import json
 from pathlib import Path
-import subprocess
 
 import typer
 from rich.console import Console
 from rich.table import Table
 
+from vidio_cli.ffmpeg_utils import run_command
 
 console = Console()
 
@@ -50,24 +50,8 @@ def count_frames(input_file: Path, verbose: bool = False) -> int:
         str(input_file),
     ]
 
-    if verbose:
-        console.print(f"Running: [dim]{' '.join(command)}[/dim]")
-
-    # Always capture output for ffprobe commands, regardless of verbose setting
     try:
-        result = subprocess.run(
-            command,
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-    except subprocess.CalledProcessError as e:
-        console.print("[red]Error: ffprobe command failed[/red]")
-        if e.stderr:
-            console.print(e.stderr)
-        raise typer.Exit(1)
-
-    try:
+        result = run_command(command, verbose=verbose, check=True, capture_output=True)
         frames = int(result.stdout.strip())
         return frames
     except (ValueError, TypeError):
@@ -117,24 +101,8 @@ def info(
         str(input_file),
     ]
 
-    if verbose:
-        console.print(f"Running: [dim]{' '.join(command)}[/dim]")
-
-    # Always capture output for ffprobe commands, regardless of verbose setting
     try:
-        result = subprocess.run(
-            command,
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-    except subprocess.CalledProcessError as e:
-        console.print("[red]Error: ffprobe command failed[/red]")
-        if e.stderr:
-            console.print(e.stderr)
-        raise typer.Exit(1)
-
-    try:
+        result = run_command(command, verbose=verbose, check=True, capture_output=True)
         info_data = json.loads(result.stdout)
     except json.JSONDecodeError:
         console.print("[red]Error parsing ffprobe output.[/red]")
