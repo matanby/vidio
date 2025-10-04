@@ -43,6 +43,27 @@ vidio concat video1.mp4 video2.mp4 output.mp4
 vidio concat video1.mp4 video2.mp4 output.mp4 --vertical
 ```
 
+### List Video Files
+
+```bash
+# List videos in current directory (ls-style output)
+vidio list
+# or use the shorter alias
+vidio ls
+
+# List with detailed information (duration, resolution, codec)
+vidio ls --detailed
+
+# Search recursively in subdirectories
+vidio ls --recursive
+
+# Use table format instead of ls-style
+vidio ls --table
+
+# Get JSON output for scripting
+vidio ls --json
+```
+
 ### Video Information
 
 ```bash
@@ -72,16 +93,85 @@ vidio grid video1.mp4 video2.mp4 video3.mp4 video4.mp4 output.mp4 --width 640 --
 vidio grid video1.mp4 video2.mp4 video3.mp4 video4.mp4 output.mp4 --background white
 ```
 
-### More Commands Coming Soon
+### Trim Videos
 
-- `grid`: Arrange videos in a grid
-- `to-gif`: Convert a video to GIF
-- `extract-audio`: Extract audio from video
-- `screenshot`: Take a screenshot at a specific time
-- `resize`: Resize a video
-- `crop`: Crop a video
-- `info`: Show video metadata
-- ...and more!
+```bash
+# Trim from 30 seconds to 90 seconds
+vidio trim input.mp4 output.mp4 --start 30 --end 90
+
+# Trim from 1:30 for 45 seconds duration
+vidio trim input.mp4 output.mp4 --start 1:30 --duration 45
+
+# Trim from beginning to 2:15
+vidio trim input.mp4 output.mp4 --end 2:15
+
+# Trim using different time formats
+vidio trim input.mp4 output.mp4 --start 0:01:30 --end 0:02:45
+```
+
+### Resize Videos
+
+```bash
+# Resize to specific dimensions (maintains aspect ratio)
+vidio resize input.mp4 output.mp4 --width 1920 --height 1080
+
+# Scale by percentage
+vidio resize input.mp4 output.mp4 --scale 0.5  # 50% of original size
+
+# Resize width only (height auto-calculated)
+vidio resize input.mp4 output.mp4 --width 1280
+
+# Resize height only (width auto-calculated)  
+vidio resize input.mp4 output.mp4 --height 720
+
+# Force exact dimensions (may distort)
+vidio resize input.mp4 output.mp4 -w 1920 -h 1080 --force-aspect
+```
+
+### Convert to GIF
+
+```bash
+# Basic conversion with optimized palette
+vidio to-gif video.mp4 output.gif
+
+# High quality with custom frame rate
+vidio to-gif video.mp4 output.gif --fps 15 --quality high
+
+# Small file size for web
+vidio to-gif video.mp4 output.gif --scale 0.3 --fps 8 --quality low
+
+# Convert specific time range
+vidio to-gif video.mp4 output.gif --start 10 --duration 5
+
+# Custom width with different dithering
+vidio to-gif video.mp4 output.gif --width 800 --dither bayer
+
+# Fast conversion (skip optimization)
+vidio to-gif video.mp4 output.gif --no-optimize
+```
+
+### Crop Videos
+
+```bash
+# Crop to center square (perfect for Instagram)
+vidio crop input.mp4 output.mp4 --preset center-square
+
+# Crop to 16:9 aspect ratio
+vidio crop input.mp4 output.mp4 --preset 16:9
+
+# Crop to 9:16 aspect ratio (vertical/portrait)
+vidio crop input.mp4 output.mp4 --preset 9:16
+
+# Crop to 4:3 aspect ratio
+vidio crop input.mp4 output.mp4 --preset 4:3
+
+# Custom crop region (centered)
+vidio crop input.mp4 output.mp4 --width 1280 --height 720
+
+# Custom crop with specific position
+vidio crop input.mp4 output.mp4 -w 1280 -h 720 --x 100 --y 50
+```
+
 
 ## Development
 
