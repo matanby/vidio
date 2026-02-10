@@ -10,8 +10,11 @@ from vidio_cli.cli import app
 from vidio_cli.ffmpeg_utils import check_ffmpeg
 from vidio_cli.commands.grid import calculate_grid_size
 
-# Skip all tests if ffmpeg is not available
-pytestmark = pytest.mark.skipif(not check_ffmpeg(), reason="ffmpeg is not available")
+# Integration tests require ffmpeg and real media assets.
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.skipif(not check_ffmpeg(), reason="ffmpeg is not available"),
+]
 
 runner = CliRunner()
 

@@ -5,11 +5,37 @@ on:
   pull_request:
 
 jobs:
-  test:
+  fast-tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Sync dependencies
+        run: uv sync --group dev
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Fast tests (non-integration)
+        run: uv run pytest -q -m "not integration"
+
+  integration-tests:
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -20,7 +46,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.11"
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
@@ -35,8 +61,5 @@ jobs:
       - name: Sync dependencies
         run: uv sync --group dev
 
-      - name: Lint
-        run: uv run ruff check .
-
-      - name: Tests
-        run: uv run pytest -q
+      - name: Integration tests
+        run: uv run pytest -q -m "integration"

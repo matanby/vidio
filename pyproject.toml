@@ -46,3 +46,8 @@ vidio = "vidio_cli.cli:app"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+markers = [
+    "integration: tests that require ffmpeg and real media assets",
+]

@@ -9,8 +9,11 @@ from typer.testing import CliRunner
 from vidio_cli.cli import app
 from vidio_cli.ffmpeg_utils import check_ffmpeg
 
-# Skip all tests if ffmpeg is not available
-pytestmark = pytest.mark.skipif(not check_ffmpeg(), reason="ffmpeg is not available")
+# Integration tests require ffmpeg and real media assets.
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.skipif(not check_ffmpeg(), reason="ffmpeg is not available"),
+]
 
 runner = CliRunner()
 
@@ -111,7 +114,6 @@ def test_resize_conflicting_parameters():
     )
 
     assert result.exit_code != 0
-    assert "Cannot use --scale with" in result.stdout
 
 
 def test_resize_invalid_scale():

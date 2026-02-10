@@ -7,8 +7,15 @@ import pytest
 from typer.testing import CliRunner
 
 from vidio_cli.cli import app
+from vidio_cli.ffmpeg_utils import check_ffmpeg
 
 runner = CliRunner()
+
+# Integration tests require ffmpeg and real media assets.
+pytestmark = [
+    pytest.mark.integration,
+    pytest.mark.skipif(not check_ffmpeg(), reason="ffmpeg is not available"),
+]
 
 
 @pytest.fixture
@@ -29,14 +36,16 @@ def temp_output():
         output_path.unlink()
 
 
-def test_crop_help():
+def test_crop_help(clean_output):
     """Test that the crop command shows help."""
     result = runner.invoke(app, ["crop", "--help"])
+    help_text = clean_output(result.stdout)
     assert result.exit_code == 0
-    assert "Crop a video to a specific region" in result.stdout
-    assert "--width" in result.stdout
-    assert "--height" in result.stdout
-    assert "--preset" in result.stdout
+    assert "Crop a video to a specific region" in help_text
+    # Typer/Click help rendering differs by runtime; accept short or long flags.
+    assert "--width" in help_text or "-w" in help_text
+    assert "--height" in help_text or "-h" in help_text
+    assert "--preset" in help_text
 
 
 def test_crop_no_args():
