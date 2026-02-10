@@ -22,6 +22,16 @@ def check_ffmpeg() -> bool:
     return shutil.which("ffmpeg") is not None
 
 
+def check_ffprobe() -> bool:
+    """
+    Check if ffprobe is available on the system.
+
+    Returns:
+        bool: True if ffprobe is available, False otherwise.
+    """
+    return shutil.which("ffprobe") is not None
+
+
 def ensure_ffmpeg():
     """
     Ensure that ffmpeg is available, or exit with an error message.
@@ -29,6 +39,19 @@ def ensure_ffmpeg():
     if not check_ffmpeg():
         error_console.print("[bold red]Error:[/bold red] ffmpeg not found in PATH")
         error_console.print("Please install ffmpeg and make sure it's in your PATH.")
+        error_console.print(
+            "Installation instructions: https://ffmpeg.org/download.html"
+        )
+        raise typer.Exit(code=1)
+
+
+def ensure_ffprobe():
+    """
+    Ensure that ffprobe is available, or exit with an error message.
+    """
+    if not check_ffprobe():
+        error_console.print("[bold red]Error:[/bold red] ffprobe not found in PATH")
+        error_console.print("Please install ffmpeg (includes ffprobe).")
         error_console.print(
             "Installation instructions: https://ffmpeg.org/download.html"
         )
@@ -105,7 +128,7 @@ def get_video_info(file_path: Path, verbose: bool = False) -> dict:
     Returns:
         dict: The video information as a dictionary.
     """
-    ensure_ffmpeg()  # ffprobe is part of ffmpeg installation
+    ensure_ffprobe()
     command = [
         "ffprobe",
         "-v",

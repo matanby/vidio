@@ -9,7 +9,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from vidio_cli.ffmpeg_utils import run_command
+from vidio_cli.ffmpeg_utils import ensure_ffprobe, run_command
 
 console = Console()
 
@@ -200,6 +200,7 @@ def list_videos(
     """
     # Get verbose flag from global context
     verbose = ctx.obj.get("VERBOSE", False) if ctx.obj else False
+    ensure_ffprobe()
 
     # Use current directory if none specified
     target_dir = directory or Path.cwd()

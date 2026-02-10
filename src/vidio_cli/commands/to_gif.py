@@ -92,7 +92,6 @@ def build_filter_complex(
         tuple: (input_args, filter_string)
     """
     input_args = []
-    filters = []
     
     # Add time range options to input
     if start and start != "0":
