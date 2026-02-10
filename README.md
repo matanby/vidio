@@ -6,12 +6,27 @@ A simple and easy-to-use ffmpeg wrapper for common video operations.
 
 - **Stupidly Easy:** Simple CLI commands for common video operations.
 - **Powerful Defaults:** Sensible defaults make it work great out of the box.
-- **Extensible:** New commands can be easily added.
+- **Focused v1 Scope:** Core commands people use repeatedly, without feature bloat.
 
 ## Requirements
 
 - Python 3.10+
 - ffmpeg (must be installed and in your PATH)
+
+## v1 Command Scope
+
+`vidio-cli` 0.1.0 intentionally focuses on practical, high-frequency tasks:
+
+- `list` / `ls`: find video files quickly
+- `info`: inspect metadata and streams
+- `trim`: cut clips by time range
+- `resize`: scale for delivery targets
+- `crop`: convert to target aspect ratios
+- `concat`: place videos side-by-side or stacked
+- `grid`: build multi-video collages
+- `to-gif`: convert clips to GIF with good defaults
+
+Commands that are less consistently useful (for example, niche one-off transforms) are deferred to later releases.
 
 ## Installation
 
@@ -52,7 +67,7 @@ vidio list
 vidio ls
 
 # List with detailed information (duration, resolution, codec)
-vidio ls --detailed
+vidio ls --list
 
 # Search recursively in subdirectories
 vidio ls --recursive
@@ -177,14 +192,17 @@ vidio crop input.mp4 output.mp4 -w 1280 -h 720 --x 100 --y 50
 
 ```bash
 # Clone the repo
-git clone https://github.com/yourusername/vidio-cli.git
+git clone https://github.com/matanb/vidio-cli.git
 cd vidio-cli
 
-# Install in development mode
-pip install -e ".[dev]"
+# Install dependencies
+uv sync --group dev
 
 # Run tests
-pytest
+uv run pytest -q
+
+# Run lint
+uv run ruff check .
 ```
 
 ## License
