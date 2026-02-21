@@ -1,6 +1,6 @@
 [project]
 name = "vidio-cli"
-version = "0.1.0"
+version = "0.1.1"
 description = "A simple and easy-to-use ffmpeg wrapper for common video operations"
 readme = "README.md"
 license = "MIT"
