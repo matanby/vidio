@@ -336,9 +336,10 @@ wheels = [
 
 [[package]]
 name = "vidio-cli"
-version = "0.1.0"
+version = "0.1.2"
 source = { editable = "." }
 dependencies = [
+    { name = "click" },
     { name = "rich" },
     { name = "typer" },
 ]
@@ -352,6 +353,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "click", specifier = ">=8.0.0" },
     { name = "rich", specifier = ">=13.5.0" },
     { name = "typer", specifier = ">=0.9.0" },
 ]
